@@ -9,12 +9,12 @@ const options = {
   fetch('https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1', options)
     .then(response => response.json())
     .then(response => {
-        console.log(response.results[0])
-        
+
         const promise = new Promise((resolve,reject)=>{
-            const cardContainer = document.querySelector(".card-container");
             const dataArray = response.results;
+            const cardContainer = document.querySelector(".card-container");
             const isTheEnd = dataArray.length -1 ;
+
             dataArray.forEach((el,i) => {
                 const template =
                 `
@@ -55,6 +55,7 @@ const options = {
         const searchBtn = document.querySelector("#serach_btn");
         const checkText = new RegExp(/\s/g)
         const textArr = [];
+
         cardsTitle.forEach(el => {
           const item = el.textContent.replace(checkText, "").toLowerCase();
           textArr.push(item)
@@ -70,12 +71,12 @@ const options = {
                 }
             })
 
-            if(count === cards.length) {
-                alert("똑디 쳐라 문희화낸다")
-                cards.forEach(a=>{
-                    a.style.display = 'block'
-                })
-            }
+            // if(count === cards.length) {
+            //     alert("똑디 쳐라 문희화낸다")
+            //     cards.forEach(a=>{
+            //         a.style.display = 'block'
+            //     })
+            // }
         })
         
         cards.forEach(el=>{
@@ -115,3 +116,4 @@ const options = {
         })
     })
     .catch(err => console.error(err));
+
