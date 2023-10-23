@@ -9,111 +9,113 @@ const options = {
   fetch('https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1', options)
     .then(response => response.json())
     .then(response => {
-
-        const promise = new Promise((resolve,reject)=>{
-            const dataArray = response.results;
-            const cardContainer = document.querySelector(".card-container");
-            const isTheEnd = dataArray.length -1 ;
-
-            dataArray.forEach((el,i) => {
-                const template =
-                `
-                <div class="card" id=${el.id}>
-                <div class="card-imgBox">
-                    <img src=https://image.tmdb.org/t/p/w500${el.poster_path} alt="">
-                </div>
-                <div class="card-head">
-                    <h4 class="card-title">${el.title}</h4>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        ${el.overview}
-                    </p>
-                </div>
-                <div class="card-footer">
-                <p class="movie-birth">${el.release_date}</p>
-                    <p class="movie-rating">Rating ${el.vote_average}</p>
-                </div>
-            </div>
-                `
-                cardContainer.insertAdjacentHTML('beforeend',template)
-                if(i === isTheEnd) resolve();
-            });
-        })
-        return promise
-    })
-    .then(()=>{
-
-        // input의 value에 공백 대소문자를 => 공백 없애고, 대소문자 그냥 소문자로 인식 시키자. 
-
-        // 공백없애기
-
-        // cardstitle의 공백 대소문자를 => 공백 없애고, 대소문자를 그냥 소문자로 인식 시키자.
-        const searchInput = document.querySelector("#search_movie");
-        const cards = document.querySelectorAll(".card");
-        const cardsTitle = document.querySelectorAll(".card-title");
-        const searchBtn = document.querySelector("#serach_btn");
-        const checkText = new RegExp(/\s/g)
-        const textArr = [];
-
-        cardsTitle.forEach(el => {
-          const item = el.textContent.replace(checkText, "").toLowerCase();
-          textArr.push(item)
-        })
-        searchBtn.addEventListener("click",(e)=>{
-            e.preventDefault();
-            let count =0;
-          const inputText =  searchInput.value.replace(/\s/g,'').toLowerCase();
-            textArr.forEach((a,i)=>{
-                if(!a.match(inputText)){
-                    cards[i].style.display = 'none';
-                    count++;
-                }
-            })
-
-            // if(count === cards.length) {
-            //     alert("똑디 쳐라 문희화낸다")
-            //     cards.forEach(a=>{
-            //         a.style.display = 'block'
-            //     })
-            // }
-        })
-        
-        cards.forEach(el=>{
-            el.addEventListener("click",function(e){
-                alert(`문희의 최애 영화 아이디는 : ${el.id}`)
-            })
-        })
-
-        console.log(cards)
-
-
-
-        searchInput.addEventListener("change" ,function(e){
-            let count = 0;
-            e.preventDefault()
-            const inputText = this.value.replace(/\s/g,'').toLowerCase();
-            textArr.forEach((a,i)=>{
-                if(!a.match(inputText)){
-                    cards[i].style.display = 'none';
-                    count++;
-                } 
-                
-            })
-            if(this.value ==='') {
-                
-                cards.forEach(a=>{
-                    a.style.display = 'block'
-                })
-            } 
-
-            if(count === cards.length) {
-                alert("똑디 쳐라 문희화낸다")
-                cards.forEach(a=>{
-                    a.style.display = 'block'
-                })
-            }
-        })
+        const movies = response.results;
+        // printingFunc ->
+        const $container = document.querySelector(".card-container");
+         AllprintingHtml(movies,$container);
+         // SearchMovieFunc ->
+         const $searchInput = document.querySelector("#search_movie");
+        $searchInput.addEventListener("change",function(){
+          searchMovie($searchInput,movies,$container)
+        });
     })
     .catch(err => console.error(err));
+ 
 
+
+
+
+
+
+
+
+
+
+
+
+
+   function AllprintingHtml(movies,container) {
+     return  movies.forEach(movie => {
+            const element = template(movie)       
+            container.append(element)
+        });
+   }
+
+   function template(element){
+        const {title,vote_average,id,overview,release_date,poster_path} = element;
+        const div = document.createElement('div');
+        div.setAttribute("id",id)
+        div.setAttribute("class","card");
+     registEvent(div);
+       div.innerHTML =  
+          `
+        <div class="card-imgBox">
+            <img src=https://image.tmdb.org/t/p/w500${poster_path} alt="">
+        </div>
+        <div class="card-head">
+            <h4 class="card-title">${title}</h4>
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                ${overview}
+            </p>
+        </div>
+        <div class="card-footer">
+        <p class="movie-birth">${release_date}</p>
+            <p class="movie-rating">Rating ${vote_average}</p>
+        </div>
+        `
+        return div
+   }
+
+   function registEvent(eventTarget) {
+    eventTarget.addEventListener("click",function(){
+      registEventFunc(eventTarget)
+    })
+   }
+
+   function registEventFunc(eventTarget){
+    alert(`영화의 ID : ${eventTarget.id}`);
+   }
+
+   function removeEvent(eventTarget,func) {
+    const targets = eventTarget.children;
+    for(let target of targets ) {
+        target.removeEventListener("click",func)
+        console.log(target)
+    }
+   }
+
+
+
+   function searchMovie(input,movies,container){
+    !input.value?.trim() ? insepectValue(input.value) : newPrintingHtml(input.value,movies,container)
+    }
+
+ function insepectValue(value){
+        const preValue = value
+        const $currentValue = document.querySelector("#search_movie").value;
+        console.log($currentValue)
+        console.log(preValue)
+        // input.value !== $currentValue ? 
+    
+ }
+
+ function newPrintingHtml(str,movies,container){
+  //인풋의 value 값과 movies의 text를 filter로 비교
+     const value = str.toLowerCase();
+     const searchTargets = movies.filter(target =>{
+         const title = target.title.toLowerCase();
+         return title.includes(value);
+     });
+
+     //아무거 쳐버려서 필터 배열없으면 없는디 띄우기
+     if(searchTargets.length === 0) return alert("없는디");
+
+     // 필터 배열에 뭐 잇음 실행하기
+     removeEvent(container, registEventFunc)
+     container.innerHTML = '';
+     AllprintingHtml(searchTargets,container);
+ }
+
+    
